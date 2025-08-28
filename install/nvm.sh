@@ -63,17 +63,12 @@ if [ $? -eq 0 ]; then
         echo "Warning: NVM not found in current process after sourcing."
     fi
 
-    # If the script is executed (not sourced), open an interactive shell with NVM available
-    if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-        echo "Opening a new interactive shell with NVM available (type 'exit' to return)."
-        exec bash -i
-    fi
+    # Install and activate latest LTS Node.js non-interactively
+    echo "Installing and activating latest LTS Node.js via nvm..."
+    nvm install --lts
+    nvm use --lts
+    echo "npm version: $(npm --version)"
 else
     echo "Error: NVM installation failed."
     exit 1
 fi
-
-
-bash -c nvm install --lts
-bash -c nvm use --lts
-bash -c npm --version

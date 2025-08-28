@@ -3,8 +3,8 @@
 A Docker-based VS Code Environment running code-server. Get a consistent, portable VS Code experience with customizable extensions and system packages.
 
 [![Docker Image Version](https://img.shields.io/github/v/tag/nchekwa/vsce?color=blue&label=version&style=flat-square)](https://github.com/nchekwa/vsce/tags)
-[![Docker Build](https://img.shields.io/github/actions/workflow/status/nchekwa/vsce/docker-build-push.yml?branch=main&style=flat-square)](https://github.com/nchekwa/vsce/actions/workflows/docker-build-push.yml)
-[![Security Scan](https://img.shields.io/github/actions/workflow/status/nchekwa/vsce/security-scan.yml?branch=main&style=flat-square)](https://github.com/nchekwa/vsce/security)
+[![Docker Build](https://img.shields.io/github/actions/workflow/status/nchekwa/vsce/docker-publish.yml?branch=main&style=flat-square)](https://github.com/nchekwa/vsce/actions/workflows/docker-publish.yml)
+[![Security Scan](https://img.shields.io/github/actions/workflow/status/nchekwa/vsce/security-scan.yml?branch=main&style=flat-square)](https://github.com/nchekwa/vsce/actions/workflows/security-scan.yml)
 
 ## Quick Start
 
