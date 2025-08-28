@@ -1,0 +1,16 @@
+
+
+
+build.env
+docker-builder
+docker-builder.log
+
+config/
+project/
+
+.vscode/
+.claude/
+
+
+
+
