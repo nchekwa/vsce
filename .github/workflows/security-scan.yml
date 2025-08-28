@@ -78,6 +78,12 @@ jobs:
           docker build -t vsce-test .
           echo "IMAGE_REF=vsce-test" >> $GITHUB_ENV
 
+      - name: Build image for scanning (for tags)
+        if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          docker build -t ${{ needs.extract-version.outputs.image-ref }} .
+          echo "IMAGE_REF=${{ needs.extract-version.outputs.image-ref }}" >> $GITHUB_ENV
+
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
@@ -116,6 +122,11 @@ jobs:
             echo "snyk_available=true" >> $GITHUB_OUTPUT
           fi
 
+      - name: Build image for Snyk scanning (for tags)
+        if: ${{ steps.check-snyk.outputs.snyk_available == 'true' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          docker build -t ${{ needs.extract-version.outputs.image-ref }} .
+
       - name: Run Snyk to check Docker image for vulnerabilities
         if: steps.check-snyk.outputs.snyk_available == 'true'
         uses: snyk/actions/docker@master
@@ -143,6 +154,11 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         run: |
           docker build -t vsce-test .
+
+      - name: Build image for Dockle scanning (for tags)
+        if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          docker build -t ${{ needs.extract-version.outputs.image-ref }} .
 
       - name: Install Dockle
         run: |
