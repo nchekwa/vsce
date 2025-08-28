@@ -58,6 +58,7 @@ services:
 ### Configuration Files
 
 Create `/config/extensions.txt`:
+
 ```
 ms-python.python
 ms-vscode.vscode-yaml
@@ -65,6 +66,7 @@ redhat.vscode-yaml
 ```
 
 Create `/config/dpkg.txt`:
+
 ```
 git
 curl
@@ -72,17 +74,6 @@ wget
 jq
 htop
 ```
-
-## Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PASSWORD` | VS Code password | `vsce` |
-| `INSTALL_EXTENSIONS` | Space-separated VS Code extensions | `""` |
-| `INSTALL_DPKG` | Space-separated system packages | `""` |
-| `EXTENSIONS_UPDATE` | Update existing extensions | `false` |
-| `INSTALL_EXTENSIONS_FORCE` | Force reinstall extensions | `false` |
-| `BOOT_INSTALL_SCRIPT` | Custom boot script path | `""` |
 
 ## Custom Scripts
 
@@ -103,7 +94,6 @@ Automated workflows handle:
 - **Docker Publishing**: Automated image publishing to GitHub Container Registry
 
 See [GitHub Actions](https://github.com/nchekwa/vsce/actions) for details.
-
 
 ## License
 
