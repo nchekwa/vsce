@@ -1,16 +1,16 @@
 # Dockerfile arguments
-ARG VERSION="0.5.0"
+ARG VERSION="0.5.3"
 
 FROM codercom/code-server:latest
 
 # Labels
-LABEL version="0.5.3"
+LABEL version="${VERSION}"
 LABEL maintainer="vsce"
 LABEL description="Docker-based VS Code Environment with code-server"
 LABEL org.opencontainers.image.title="VS Code Environment (VSCE)"
 LABEL org.opencontainers.image.version="${VERSION}"
 LABEL org.opencontainers.image.licenses="MIT"
-LABEL org.opencontainers.image.documentation="https://github.com/${GITHUB_REPOSITORY}"
+LABEL org.opencontainers.image.documentation="https://github.com/nchekwa/vsce"
 
 COPY --chown=coder:users "install/" /home/coder/install/
 
@@ -23,5 +23,5 @@ RUN sudo apt-get update && \
     sudo rm -rf /var/lib/apt/lists/*
 
 
-COPY "entrypoint.sh" /
+COPY --chmod=0755 "entrypoint.sh" /
 ENTRYPOINT [ "/entrypoint.sh" ]
