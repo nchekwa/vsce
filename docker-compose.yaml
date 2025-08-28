@@ -2,7 +2,7 @@ services:
   vsce:
     container_name: vsce
     hostname: vsce
-    image: vsce:1.0
+    image: ghcr.io/nchekwa/vsce:latest
     ports:
       - 8080:8080
     volumes:
