@@ -58,6 +58,7 @@ docker stop vsce && docker rm vsce
 
 - Manages VS Code extensions installation from environment variables or config files
 - Handles system package installation via apt
+- Installs global npm packages from environment variables or config files
 - Configures authentication and starts code-server
 - Supports custom boot scripts for additional setup
 - Uses dedicated user-data and extensions directories for persistence
@@ -79,6 +80,7 @@ The container supports flexible configuration through multiple methods:
 - `INSTALL_EXTENSIONS_FORCE`: Force extension reinstallation
 - `EXTENSIONS_UPDATE`: Update all existing extensions
 - `INSTALL_DPKG`: System packages to install via apt
+- `INSTALL_NPM`: Global npm packages to install
 - `PASSWORD`: Authentication password for code-server
 - `BOOT_INSTALL_SCRIPT`: Path to custom boot script
 
@@ -86,6 +88,7 @@ The container supports flexible configuration through multiple methods:
 
 - `/home/coder/.config/extensions.txt`: List of extensions to install
 - `/home/coder/.config/dpkg.txt`: List of system packages to install
+- `/home/coder/.config/npm.txt`: List of npm packages to install globally
 - `/home/coder/.config/boot.sh`: Custom boot script
 - `/home/coder/.config/code-server/config.yaml`: code-server configuration
 

@@ -2,19 +2,29 @@ services:
   vsce:
     container_name: vsce
     hostname: vsce
-    image: ghcr.io/nchekwa/vsce:latest
+    build: .
+    image: ghcr.io/nchekwa/vsce:v0.5.6
     ports:
       - 8080:8080
     volumes:
       - ./config/:/home/coder/.config
       - ./project/:/home/coder/project
-    #user: "${UID:-$(id -u)}:${GID:-$(id -g)}"
+    user: "${UID}:${GID}"
     environment:
-      - DOCKER_USER=${DOCKER_USER:-$USER}
-      - INSTALL_EXTENSIONS=${INSTALL_EXTENSIONS:-"redhat.vscode-yaml ms-python.python"}
-      - INSTALL_EXTENSIONS_FORCE=${INSTALL_EXTENSIONS_FORCE:-false}
-      - EXTENSIONS_UPDATE=${EXTENSIONS_UPDATE:-true}
-      - INSTALL_DPKG=${INSTALL_DPKG:-"curl git jq"}
-      - PASSWORD=${PASSWORD:-vsce}
+      DOCKER_USER: $USER
+      INSTALL_EXTENSIONS: |
+        redhat.vscode-yaml
+        ms-python.python
+      INSTALL_EXTENSIONS_FORCE: ${INSTALL_EXTENSIONS_FORCE:-false}
+      EXTENSIONS_UPDATE: ${EXTENSIONS_UPDATE:-true}
+      INSTALL_DPKG: |
+        curl
+        git
+        jq
+      INSTALL_NPM: |
+        @anthropic-ai/claude-code
+        @proofs-io/shotgun
+        @proofs-io/shotgun-server
+      PASSWORD: ${PASSWORD:-vsce}
     stdin_open: true
     tty: true

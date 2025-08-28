@@ -7,11 +7,12 @@
 #   INSTALL_EXTENSIONS_FORCE=true
 #   INSTALL_DPKG="curl git jq"
 #     -> or use file: /home/coder/.config/dpkg.txt
+#   INSTALL_NPM="express lodash axios"
+#     -> or use file: /home/coder/.config/npm.txt
 #   EXTENSIONS_UPDATE=true
 #   BOOT_INSTALL_SCRIPT="/home/coder/.config/boot.sh"
 
 ## 
-
 
 
 
@@ -136,6 +137,47 @@ if [ ! -z "$EXTENSIONS_TO_INSTALL" ]; then
             code-server --user-data-dir=/home/coder/.code/data --extensions-dir=/home/coder/.code/extensions --install-extension "$ext" $FORCE_FLAG
         fi
     done
+fi
+
+# Install npm packages if specified in environment variable or config file
+NPM_PACKAGES_TO_INSTALL=""
+
+# Check environment variable
+if [ ! -z "${INSTALL_NPM}" ]; then
+    echo "Found npm packages in environment variable: ${INSTALL_NPM}"
+    
+    # Remove quotes and replace commas with spaces
+    CLEANED_NPM_PACKAGES="${INSTALL_NPM//\"/}"
+    CLEANED_NPM_PACKAGES="${CLEANED_NPM_PACKAGES//,/ }"
+    
+    NPM_PACKAGES_TO_INSTALL="$NPM_PACKAGES_TO_INSTALL $CLEANED_NPM_PACKAGES"
+fi
+
+# Check config file
+NPM_CONFIG_FILE="/home/coder/.config/npm.txt"
+if [ -f "$NPM_CONFIG_FILE" ]; then
+    CONFIG_NPM_PACKAGES=$(parse_config_file "$NPM_CONFIG_FILE")
+    NPM_PACKAGES_TO_INSTALL="$NPM_PACKAGES_TO_INSTALL $CONFIG_NPM_PACKAGES"
+fi
+
+# Install npm packages if any were specified
+if [ ! -z "$NPM_PACKAGES_TO_INSTALL" ]; then
+    echo "Installing npm packages: $NPM_PACKAGES_TO_INSTALL"
+    
+    # Use nvm.sh script to install Node.js and npm
+    if ! command -v npm &> /dev/null; then
+        echo "npm not found, installing Node.js using nvm.sh..."
+        # Source the nvm.sh script to install Node.js
+        bash /home/coder/install/nvm.sh
+        
+        # Load nvm in the current shell
+        export NVM_DIR="$HOME/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+        [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+    fi
+    
+    # Install packages globally
+    npm install -g $NPM_PACKAGES_TO_INSTALL
 fi
 
 # Set default boot script path if not provided
