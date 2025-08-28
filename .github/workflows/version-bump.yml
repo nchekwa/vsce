@@ -1,0 +1,110 @@
+name: Bump Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Type of version bump'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+        - patch
+        - minor
+        - major
+      create_release:
+        description: 'Create a GitHub release'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Bump version
+        run: |
+          # Read current version
+          CURRENT_VERSION=$(node -e "console.log(require('./version.json').version)")
+          echo "Current version: $CURRENT_VERSION"
+          
+          # Parse version components
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+          
+          # Bump version based on input
+          case "${{ github.event.inputs.version_type }}" in
+            "major")
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            "minor")
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            "patch")
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+          
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          echo "New version: $NEW_VERSION"
+          
+          # Update version.json
+          node -e "
+            const version = require('./version.json');
+            version.version = '$NEW_VERSION';
+            require('fs').writeFileSync('./version.json', JSON.stringify(version, null, 2));
+          "
+          
+          # Update Dockerfile with version label
+          sed -i "s/LABEL version=\".*\"/LABEL version=\"$NEW_VERSION\"/" Dockerfile || echo "LABEL version=\"$NEW_VERSION\"" >> Dockerfile
+          
+          # Commit changes
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add version.json Dockerfile
+          git commit -m "Bump version to $NEW_VERSION"
+          
+          # Push changes
+          git push origin main
+          
+          # Create and push tag
+          git tag -a "v$NEW_VERSION" -m "Version $NEW_VERSION"
+          git push origin "v$NEW_VERSION"
+          
+          # Set outputs for next job
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        if: ${{ github.event.inputs.create_release == 'true' }}
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.bump-version.outputs.NEW_VERSION }}
+          release_name: Release v${{ steps.bump-version.outputs.NEW_VERSION }}
+          body: |
+            Changes in this Release
+            - Version bumped to ${{ steps.bump-version.outputs.NEW_VERSION }}
+            
+            ## Installation
+            ```bash
+            docker pull ghcr.io/${{ github.repository }}:v${{ steps.bump-version.outputs.NEW_VERSION }}
+            ```
+          draft: false
+          prerelease: false

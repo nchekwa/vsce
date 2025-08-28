@@ -1,4 +1,16 @@
+# Dockerfile arguments
+ARG VERSION="0.5.0"
+
 FROM codercom/code-server:latest
+
+# Labels
+LABEL version="${VERSION}"
+LABEL maintainer="vsce"
+LABEL description="Docker-based VS Code Environment with code-server"
+LABEL org.opencontainers.image.title="VS Code Environment (VSCE)"
+LABEL org.opencontainers.image.version="${VERSION}"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.documentation="https://github.com/${GITHUB_REPOSITORY}"
 
 COPY --chown=coder:users "install/" /home/coder/install/
 
