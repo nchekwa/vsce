@@ -21,7 +21,10 @@ Access VS Code at `http://localhost:8080` with password `vsce`.
 - **VS Code in Browser**: Full VS Code experience via code-server
 - **Automatic Extension Management**: Pre-installed extensions on container start
 - **System Package Installation**: Install additional Debian packages
+- **Global NPM Package Management**: Install npm packages globally across the container
 - **Multi-Language Support**: Pre-configured Node.js and Python environments
+- **Multi-line Configuration**: Support for YAML-style multi-line configuration in docker-compose
+- **Directory Auto-Creation**: Automatic creation of required directories for persistent storage
 - **Persistent Configuration**: Settings, extensions, and data persist across restarts
 - **Security Scanning**: Automated vulnerability scanning with Trivy and Snyk
 
@@ -40,8 +43,25 @@ services:
       - ./project:/home/coder/project
     environment:
       - PASSWORD="vsce"
-      - INSTALL_EXTENSIONS="ms-python.python ms-vscode.vscode-yaml"
-      - INSTALL_DPKG="git curl wget jq"
+      - INSTALL_EXTENSIONS_FORCE=false
+      - EXTENSIONS_UPDATE=false
+      # Multi-line extensions using YAML format
+      INSTALL_EXTENSIONS: |
+        ms-python.flake8
+        ms-python.pylint
+        redhat.vscode-yaml
+        ms-python.python
+        ms-azuretools.vscode-docker
+      # System packages
+      INSTALL_DPKG: |
+        curl
+        git
+        jq
+      # Global npm packages
+      INSTALL_NPM: |
+        @anthropic-ai/claude-code
+        typescript
+        nodemon
 ```
 
 ### Environment Variables
@@ -49,8 +69,9 @@ services:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `PASSWORD` | VS Code password | `vsce` |
-| `INSTALL_EXTENSIONS` | Space-separated VS Code extensions | `""` |
-| `INSTALL_DPKG` | Space-separated system packages | `""` |
+| `INSTALL_EXTENSIONS` | VS Code extensions (supports multi-line YAML) | `""` |
+| `INSTALL_DPKG` | System packages to install via apt | `""` |
+| `INSTALL_NPM` | Global npm packages to install | `""` |
 | `EXTENSIONS_UPDATE` | Update existing extensions | `false` |
 | `INSTALL_EXTENSIONS_FORCE` | Force reinstall extensions | `false` |
 | `BOOT_INSTALL_SCRIPT` | Custom boot script path | `""` |
@@ -74,6 +95,107 @@ wget
 jq
 htop
 ```
+
+Create `/config/npm.txt`:
+
+```
+@anthropic-ai/claude-code
+typescript
+nodemon
+eslint
+prettier
+```
+
+## Multi-line Configuration Support
+
+The environment variables support multi-line YAML format for better readability in docker-compose files:
+
+### Multi-line Extensions
+
+```yaml
+environment:
+  INSTALL_EXTENSIONS: |
+    ms-python.flake8
+    ms-python.pylint
+    redhat.vscode-yaml
+    ms-python.python
+    ms-azuretools.vscode-docker
+    kilocode.kilo-code
+```
+
+### Multi-line System Packages
+
+```yaml
+environment:
+  INSTALL_DPKG: |
+    curl
+    git
+    jq
+    htop
+    tree
+```
+
+### Multi-line NPM Packages
+
+```yaml
+environment:
+  INSTALL_NPM: |
+    @anthropic-ai/claude-code
+    typescript
+    nodemon
+    eslint
+    prettier
+```
+
+## Global NPM Package Management
+
+VSCE supports automatic installation of global npm packages during container startup:
+
+### Using Environment Variables
+
+```bash
+# Set via docker-compose
+environment:
+  INSTALL_NPM: "typescript nodemon eslint prettier"
+
+# Or set via command line
+docker run -e INSTALL_NPM="typescript nodemon" ghcr.io/nchekwa/vsce:latest
+```
+
+### Using Configuration Files
+
+Create `/config/npm.txt`:
+
+```
+# Global npm packages to install
+@anthropic-ai/claude-code
+typescript
+nodemon
+eslint
+prettier
+@vue/cli
+create-react-app
+```
+
+### Automatic Node.js Setup
+
+When npm packages are specified, VSCE automatically:
+1. Checks if npm is available
+2. If not available, installs Node.js using nvm.sh
+3. Installs the specified packages globally
+
+## Directory Auto-Creation
+
+VSCE automatically creates required directories for persistent storage:
+
+- `/home/coder/.code/data` - User data and settings
+- `/home/coder/.code/extensions` - VS Code extensions
+
+This ensures that:
+- Extensions persist across container restarts
+- User settings are maintained
+- No startup errors from missing directories
+- Seamless persistent storage experience
 
 ## Custom Scripts
 

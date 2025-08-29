@@ -1,5 +1,5 @@
 # Dockerfile arguments
-ARG VERSION="0.5.7"
+ARG VERSION="0.5.8"
 
 FROM codercom/code-server:latest
 
