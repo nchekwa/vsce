@@ -14,7 +14,6 @@ services:
       DOCKER_USER: $USER
       PASSWORD: ${PASSWORD:-vsce}
       INSTALL_EXTENSIONS_FORCE: ${INSTALL_EXTENSIONS_FORCE:-false}
-      EXTENSIONS_UPDATE: ${EXTENSIONS_UPDATE:-true}
       INSTALL_EXTENSIONS: |
         ms-python.flake8
         ms-python.pylint

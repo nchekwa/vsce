@@ -56,13 +56,9 @@ version_info=$(code-server --version)
 echo "Current version:" $(echo $version_info | tr '\n' ' ')
 
 
-# Update all extensions if specified
+# List existing extensions
 echo "Existing installed extensions:"
 code-server --user-data-dir=/home/coder/.code/data --extensions-dir=/home/coder/.code/extensions --list-extensions --show-versions
-if [ "${EXTENSIONS_UPDATE}" = "true" ] || [ "${EXTENSIONS_UPDATE}" = "True" ]; then
-    echo "Updating all extensions..."
-    code-server --user-data-dir=/home/coder/.code/data --extensions-dir=/home/coder/.code/extensions --update-extensions
-fi
 
 
 # Install system packages if specified in environment variable or config file
