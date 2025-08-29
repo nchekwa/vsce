@@ -9,6 +9,8 @@ services:
       - ./config/:/home/coder/.config
       - ./project/:/home/coder/project
     user: "${UID}:${GID}"
+    healthcheck:
+      test: ['CMD', 'curl', '--fail-with-body', 'http://localhost:8080/']
     environment:
       DOCKER_USER: $USER
       PASSWORD: ${PASSWORD:-vsce}

@@ -70,7 +70,7 @@ services:
     stdin_open: true
 ```
 
-*Please note that [KiloCode #2191](https://github.com/Kilo-Org/kilocode/issues/2103) / Roo Code / Cline - will not work with VSCE*.
+*Please note that KiloCode / Roo Code / Cline - will not work with VSCE if it is not hidden over SSL proxy. You can use [Nginx](https://github.com/nchekwa/vsce/blob/main/nginx.conf) to proxy VSCE over SSL.*.
 
 ### Environment Variables
 
@@ -215,6 +215,20 @@ Create `/config/boot.sh` for custom initialization:
 #!/bin/bash
 echo "Custom setup commands here..."
 ```
+
+## Base Code-Server vs. OpenVSCode-Server
+
+There are two projects that emulate Visual Studio Code in the browser:
+
+- [OpenVSCode-Server](https://github.com/gitpod-io/openvscode-server/)
+- [code-server](https://github.com/coder/code-server)
+
+### What's the difference?
+
+Both code-server and OpenVSCode-Server allow you to access VS Code via a browser. However, they differ in how they integrate VS Code:
+
+- **OpenVSCode-Server**: A direct fork of VS Code with changes committed directly.
+- **code-server**: Incorporates VS Code as a submodule and applies changes via patch files.
 
 ## CI/CD
 
