@@ -104,9 +104,13 @@ EXTENSIONS_TO_INSTALL=""
 if [ ! -z "${INSTALL_EXTENSIONS}" ]; then
     echo "Found extensions in environment variable: ${INSTALL_EXTENSIONS}"
     
-    # Remove quotes and replace commas with spaces
-    CLEANED_EXTENSIONS="${INSTALL_EXTENSIONS//\"/}"
+    # Process multi-line extensions: replace newlines with spaces, then remove quotes and commas
+    CLEANED_EXTENSIONS=$(echo "${INSTALL_EXTENSIONS}" | tr '\n' ' ')
+    CLEANED_EXTENSIONS="${CLEANED_EXTENSIONS//\"/}"
     CLEANED_EXTENSIONS="${CLEANED_EXTENSIONS//,/ }"
+    
+    # Remove extra spaces that may result from newlines
+    CLEANED_EXTENSIONS=$(echo "${CLEANED_EXTENSIONS}" | sed -e 's/[[:space:]]\+/ /g' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
     
     EXTENSIONS_TO_INSTALL="$EXTENSIONS_TO_INSTALL $CLEANED_EXTENSIONS"
 fi
@@ -120,6 +124,7 @@ fi
 
 # Install extensions if any were specified
 if [ ! -z "$EXTENSIONS_TO_INSTALL" ]; then
+    echo "Final extensions to install: $EXTENSIONS_TO_INSTALL"
     # Convert the space-separated list to an array
     IFS=' ' read -ra EXTENSIONS <<< "$EXTENSIONS_TO_INSTALL"
     

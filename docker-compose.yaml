@@ -3,7 +3,7 @@ services:
     container_name: vsce
     hostname: vsce
     build: .
-    image: ghcr.io/nchekwa/vsce:v0.5.6
+    image: ghcr.io/nchekwa/vsce:latest
     ports:
       - 8080:8080
     volumes:
@@ -12,11 +12,17 @@ services:
     user: "${UID}:${GID}"
     environment:
       DOCKER_USER: $USER
-      INSTALL_EXTENSIONS: |
-        redhat.vscode-yaml
-        ms-python.python
+      PASSWORD: ${PASSWORD:-vsce}
       INSTALL_EXTENSIONS_FORCE: ${INSTALL_EXTENSIONS_FORCE:-false}
       EXTENSIONS_UPDATE: ${EXTENSIONS_UPDATE:-true}
+      INSTALL_EXTENSIONS: |
+        ms-python.flake8
+        ms-python.pylint
+        redhat.vscode-yaml
+        ms-python.python
+        ms-azuretools.vscode-docker
+        ms-azuretools.vscode-containers
+        kilocode.kilo-code
       INSTALL_DPKG: |
         curl
         git
@@ -25,6 +31,5 @@ services:
         @anthropic-ai/claude-code
         @proofs-io/shotgun
         @proofs-io/shotgun-server
-      PASSWORD: ${PASSWORD:-vsce}
     stdin_open: true
     tty: true
