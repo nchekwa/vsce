@@ -1,10 +1,10 @@
 # Dockerfile arguments
-ARG VERSION="0.5.3"
+ARG VERSION="0.5.7"
 
 FROM codercom/code-server:latest
 
 # Labels
-LABEL version="0.5.7"
+LABEL version="${VERSION}"
 LABEL maintainer="vsce"
 LABEL description="Docker-based VS Code Environment with code-server"
 LABEL org.opencontainers.image.title="VS Code Environment (VSCE)"
