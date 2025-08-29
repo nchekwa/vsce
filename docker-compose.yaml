@@ -2,7 +2,6 @@ services:
   vsce:
     container_name: vsce
     hostname: vsce
-    build: .
     image: ghcr.io/nchekwa/vsce:latest
     ports:
       - 8080:8080
@@ -28,9 +27,9 @@ services:
         curl
         git
         jq
+        docker.io
       INSTALL_NPM: |
         @anthropic-ai/claude-codeafte
         @proofs-io/shotgun
         @proofs-io/shotgun-server
     stdin_open: true
-    tty: true

@@ -35,34 +35,42 @@ Access VS Code at `http://localhost:8080` with password `vsce`.
 ```yaml
 services:
   vsce:
+    container_name: vsce
+    hostname: vsce
     image: ghcr.io/nchekwa/vsce:latest
     ports:
-      - "8080:8080"
+      - 8080:8080
     volumes:
-      - ./config:/home/coder/.config
-      - ./project:/home/coder/project
+      - ./config/:/home/coder/.config
+      - ./project/:/home/coder/project
+    user: "${UID}:${GID}"
     environment:
-      - PASSWORD="vsce"
-      - INSTALL_EXTENSIONS_FORCE=false
-      - EXTENSIONS_UPDATE=false
-      # Multi-line extensions using YAML format
+      DOCKER_USER: $USER
+      PASSWORD: ${PASSWORD:-vsce}
+      INSTALL_EXTENSIONS_FORCE: ${INSTALL_EXTENSIONS_FORCE:-false}
       INSTALL_EXTENSIONS: |
+        ms-python.python
         ms-python.flake8
         ms-python.pylint
+        ms-pyright.pyright
         redhat.vscode-yaml
-        ms-python.python
         ms-azuretools.vscode-docker
-      # System packages
+        ms-azuretools.vscode-containers
+        kilocode.kilo-code
+        anthropic.claude-code
       INSTALL_DPKG: |
         curl
         git
         jq
-      # Global npm packages
+        docker.io
       INSTALL_NPM: |
-        @anthropic-ai/claude-code
-        typescript
-        nodemon
+        @anthropic-ai/claude-codeafte
+        @proofs-io/shotgun
+        @proofs-io/shotgun-server
+    stdin_open: true
 ```
+
+*Please note that [KiloCode #2191](https://github.com/Kilo-Org/kilocode/issues/2103) / Roo Code / Cline - will not work with VSCE*.
 
 ### Environment Variables
 
@@ -180,6 +188,7 @@ create-react-app
 ### Automatic Node.js Setup
 
 When npm packages are specified, VSCE automatically:
+
 1. Checks if npm is available
 2. If not available, installs Node.js using nvm.sh
 3. Installs the specified packages globally
@@ -192,6 +201,7 @@ VSCE automatically creates required directories for persistent storage:
 - `/home/coder/.code/extensions` - VS Code extensions
 
 This ensures that:
+
 - Extensions persist across container restarts
 - User settings are maintained
 - No startup errors from missing directories

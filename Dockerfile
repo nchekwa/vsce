@@ -19,7 +19,7 @@ RUN sed -i '/^#alias ll=/s/^#//' /home/coder/.bashrc && \
     sed -i '/^#alias l=/s/^#//' /home/coder/.bashrc
 
 RUN sudo apt-get update && \
-    sudo apt-get install -y jq wget curl nano && \
+    sudo apt-get install -y jq wget curl nano iputils-ping net-tools dnsutils traceroute && \
     sudo rm -rf /var/lib/apt/lists/*
 
 
