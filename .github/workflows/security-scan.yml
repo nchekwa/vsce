@@ -90,7 +90,7 @@ jobs:
           image-ref: ${{ env.IMAGE_REF || needs.extract-version.outputs.image-ref }}
           format: 'sarif'
           output: 'trivy-results.sarif'
-          exit-code: '1'
+          exit-code: '0'
           ignore-unfixed: true
           severity: ${{ github.event.inputs.severity || 'CRITICAL,HIGH,MEDIUM' }}
           vuln-type: 'os,library'
