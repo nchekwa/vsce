@@ -15,19 +15,21 @@ services:
       PASSWORD: ${PASSWORD:-vsce}
       INSTALL_EXTENSIONS_FORCE: ${INSTALL_EXTENSIONS_FORCE:-false}
       INSTALL_EXTENSIONS: |
+        ms-python.python
         ms-python.flake8
         ms-python.pylint
+        ms-pyright.pyright
         redhat.vscode-yaml
-        ms-python.python
         ms-azuretools.vscode-docker
         ms-azuretools.vscode-containers
         kilocode.kilo-code
+        anthropic.claude-code
       INSTALL_DPKG: |
         curl
         git
         jq
       INSTALL_NPM: |
-        @anthropic-ai/claude-code
+        @anthropic-ai/claude-codeafte
         @proofs-io/shotgun
         @proofs-io/shotgun-server
     stdin_open: true

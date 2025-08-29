@@ -179,6 +179,10 @@ if [ ! -z "$NPM_PACKAGES_TO_INSTALL" ]; then
     
     # Install packages globally
     npm install -g $NPM_PACKAGES_TO_INSTALL
+    
+    # Upgrade npm to latest version
+    echo "Upgrading npm to latest version..."
+    npm install -g npm@latest
 fi
 
 # Set default boot script path if not provided
