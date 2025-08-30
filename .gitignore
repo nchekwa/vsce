@@ -10,7 +10,6 @@ project/
 
 .vscode/
 .claude/
-
-
 .env
-
+__*
+data/

@@ -14,7 +14,7 @@ cd vsce
 docker-compose up -d
 ```
 
-Access VS Code at `http://localhost:8080` with password `vsce`.
+Access VS Code at `http://localhost:20080` with password `vsce`.
 
 ## Features
 
@@ -39,11 +39,16 @@ services:
     hostname: vsce
     image: ghcr.io/nchekwa/vsce:latest
     ports:
-      - 8080:8080
+      - 20080:20080     # HTTP to Code-Server
+      - 20443:20443     # HTTPS to Caddy->Code-Server[HTTP]
+      - 20022:20022     # SSH (if env SSHD_ENABLED=true)
     volumes:
-      - ./config/:/home/coder/.config
-      - ./project/:/home/coder/project
-    user: "${UID}:${GID}"
+      - ./project/:/home/coder/project             # Project files -> mounted as /home/coder/project
+      - ./data/config/:/home/coder/.config              # User config files
+      - ./data/code/:/home/coder/.code                  # User files related to code-server
+      - ./data/local/:/home/coder/.local                # User local files
+      - /var/run/docker.sock:/var/run/docker.sock       # If you need to access from inside docker to host docker instance
+    #user: "${UID}:${GID}"
     environment:
       DOCKER_USER: $USER
       PASSWORD: ${PASSWORD:-vsce}
@@ -59,14 +64,15 @@ services:
         kilocode.kilo-code
         anthropic.claude-code
       INSTALL_DPKG: |
-        curl
         git
-        jq
         docker.io
       INSTALL_NPM: |
-        @anthropic-ai/claude-codeafte
+        @anthropic-ai/claude-code
         @proofs-io/shotgun
         @proofs-io/shotgun-server
+      CADDY_ENABLED: "${CADDY_ENABLED:-false}"
+      SSHD_ENABLED: "${SSHD_ENABLED:-false}"
+      NGROK_AUTHTOKEN: "${NGROK_AUTHTOKEN:-}"
     stdin_open: true
 ```
 
@@ -83,6 +89,9 @@ services:
 | `EXTENSIONS_UPDATE` | Update existing extensions | `false` |
 | `INSTALL_EXTENSIONS_FORCE` | Force reinstall extensions | `false` |
 | `BOOT_INSTALL_SCRIPT` | Custom boot script path | `""` |
+| `CADDY_ENABLED` | Enable Caddy reverse proxy | `false` |
+| `SSHD_ENABLED` | Enable SSH server | `false` |
+| `NGROK_AUTHTOKEN` | Ngrok authentication token | `""` |
 
 ### Configuration Files
 

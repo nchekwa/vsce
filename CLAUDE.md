@@ -22,13 +22,18 @@ docker-compose down
 
 # View container logs
 docker-compose logs -f
+
+# View logs for specific service
+docker-compose logs -f vsce
 ```
 
 ### Accessing the Environment
 
-- The code-server runs on port 8080 with password authentication
+- The code-server runs on port 20080 with password authentication
 - Default password: `vsce` (configurable via environment variable)
-- Access at: <http://localhost:8080>
+- HTTP access: <http://localhost:20080>
+- HTTPS access (via Caddy): <https://localhost:20443> (when CADDY_ENABLED=true)
+- SSH access: `ssh coder@localhost -p 20022` (when SSHD_ENABLED=true)
 
 ### Container Management
 
@@ -39,8 +44,27 @@ docker exec -it vsce bash
 # View container status
 docker ps | grep vsce
 
+# View health check status
+docker inspect vsce --format='{{.State.Health.Status}}'
+
 # Remove the container
 docker stop vsce && docker rm vsce
+```
+
+### Development Commands
+
+```bash
+# Access the code-server logs specifically
+docker-compose logs -f vsce | grep code-server
+
+# Access supervisor service status within container
+docker exec -it vsce supervisorctl status
+
+# Restart specific service within container
+docker exec -it vsce supervisorctl restart code-server
+
+# View supervisor logs
+docker exec -it vsce supervisorctl tail code-server
 ```
 
 ## Architecture
@@ -50,27 +74,47 @@ docker stop vsce && docker rm vsce
 **Dockerfile**: Base image configuration
 
 - Uses `codercom/code-server:latest` as the base
-- Installs essential utilities (jq, wget, curl, nano)
+- Installs essential utilities (jq, wget, curl, nano, supervisor, caddy, openssh-server)
 - Enables default bash aliases (ll, la, l)
-- Copies installation scripts and sets custom entrypoint
+- Copies supervisor configuration files and modular init scripts
+- Uses supervisord as the main process manager instead of a single entrypoint script
+- Exposes multiple ports: 20022 (SSH), 20080 (HTTP), 20443 (HTTPS)
 
-**entrypoint.sh**: Main container initialization script
+**src/init/init.sh**: Main container initialization orchestrator
 
-- Manages VS Code extensions installation from environment variables or config files
-- Handles system package installation via apt
-- Installs global npm packages from environment variables or config files
-- Configures authentication and starts code-server
-- Supports custom boot scripts for additional setup
-- Uses dedicated user-data and extensions directories for persistence
-- Automatically creates required directories for persistent storage
-- Handles multi-line configuration parsing for all package types
+- Runs modular installation parts in sequence during container startup
+- Exports shared functions for config file parsing
+- Coordinates the execution of all setup components
+- Provides a clean, modular approach to container initialization
+
+**src/init/parts/**: Modular initialization components
+
+- `00_dirs.sh`: Creates required directories for persistent storage
+- `01_info.sh`: Displays system information
+- `02_dpkg.sh`: Installs system packages from environment variables or config files
+- `03_extensions.sh`: Manages VS Code extensions installation with multi-line support
+- `04_npm.sh`: Handles global npm package installation
+- `05_ngrok.sh`: Configures ngrok tunneling if enabled
+- `06_boot.sh`: Executes custom boot scripts
+
+**src/supervisor/conf.d/**: Service configuration files
+
+- `code-server.conf`: Manages code-server service
+- `sshd.conf`: Manages SSH daemon service
+- `caddy.conf`: Manages Caddy reverse proxy service
+- `ngrok.conf`: Manages ngrok tunneling service
+- `init.conf`: Manages the initialization process
 
 **docker-compose.yaml**: Container orchestration
 
-- Maps host config directory to `/home/coder/.config`
-- Maps host project directory to `/home/coder/project`
-- Configures environment variables for customization
-- Exposes port 8080 for code-server access
+- Maps host directories for persistent storage:
+  - `./project/` → `/home/coder/project` (development work)
+  - `./data/config/` → `/home/coder/.config` (config files)
+  - `./data/code/` → `/home/coder/.code` (VS Code data and extensions)
+  - `./data/local/` → `/home/coder/.local` (user local files)
+- Configures environment variables for all services
+- Exposes ports: 20080 (HTTP to code-server), 20443 (HTTPS via Caddy), 20022 (SSH)
+- Includes health check for service monitoring
 - Demonstrates multi-line YAML configuration for all package types
 
 ### Configuration System
@@ -86,6 +130,10 @@ The container supports flexible configuration through multiple methods:
 - `INSTALL_NPM`: Global npm packages to install (supports multi-line YAML format)
 - `PASSWORD`: Authentication password for code-server
 - `BOOT_INSTALL_SCRIPT`: Path to custom boot script
+- `CADDY_ENABLED`: Enable Caddy reverse proxy (default: false)
+- `SSHD_ENABLED`: Enable SSH daemon service (default: true)
+- `NGROK_AUTHTOKEN`: Ngrok authentication token for tunneling
+- `DOCKER_USER`: Host username for user mapping
 
 **Configuration Files:**
 
@@ -139,26 +187,47 @@ The container supports flexible configuration through multiple methods:
 
 ## Key Architecture Decisions
 
-1. **Separation of Concerns**: The entrypoint script handles system setup, extension management, and code-server startup separately
-2. **Configuration Flexibility**: Supports both environment variables and configuration files for different use cases
-3. **Persistent Storage**: Uses mounted volumes for config, extensions, and project data
-4. **Multi-language Support**: Includes both Node.js (NVM) and Python (pyenv) version management
-5. **Security**: Uses password authentication by default with configurable options
-6. **Directory Management**: Automatic creation of required directories for seamless persistent storage
-7. **Multi-line Configuration**: YAML-style multi-line support for all package configuration types
-8. **Unified Package Management**: Consistent parsing and installation logic across extensions, system packages, and npm packages
+1. **Supervisor-Based Process Management**: Uses supervisord to manage multiple services (code-server, sshd, caddy, ngrok) instead of a single entrypoint script
+2. **Modular Initialization**: System setup is broken into modular parts that execute in sequence during container startup
+3. **Multi-Service Architecture**: Container runs multiple services simultaneously - code-server, SSH daemon, Caddy reverse proxy, and ngrok tunneling
+4. **Configuration Flexibility**: Supports both environment variables and configuration files for different use cases
+5. **Persistent Storage**: Uses mounted volumes for config, extensions, project data, and local user files
+6. **Multi-language Support**: Includes both Node.js (NVM) and Python (pyenv) version management
+7. **Security**: Uses password authentication by default with configurable options
+8. **Directory Management**: Automatic creation of required directories for seamless persistent storage
+9. **Multi-line Configuration**: YAML-style multi-line support for all package configuration types
+10. **Unified Package Management**: Consistent parsing and installation logic across extensions, system packages, and npm packages
 
 ## Development Workflow
 
 The project is designed for containerized development where:
 
 - All development tools and configurations are containerized
-- Projects are mounted from the host system
-- Extensions and settings persist across container restarts
+- Projects are mounted from the host system in `project/`
+- Extensions and settings persist across container restarts via `data/code/` and `data/config/`
 - Multiple language runtimes can be managed within the same environment
-- Always call @agent-documentation-writer for update documentation
+- Supervisor manages multiple services for robust process management
 
-The `project/` directory is intended for mounting actual development work, while the `config/` directory maintains persistent settings and configurations across container lifecycle.
+### Directory Structure
+
+- `project/` - Development work directory (mounted as `/home/coder/project`)
+- `data/config/` - Persistent configuration files (mounted as `/home/coder/.config`)
+- `data/code/` - VS Code data and extensions (mounted as `/home/coder/.code`)
+- `data/local/` - User local files (mounted as `/home/coder/.local`)
+- `src/init/` - Modular initialization scripts
+- `src/supervisor/conf.d/` - Supervisor service configurations
+- `src/scripts/` - Installation scripts (Python setup, etc.)
+
+### Service Management
+
+All services are managed by supervisord:
+- **code-server**: VS Code in browser (port 20080)
+- **sshd**: SSH daemon service (port 20022)
+- **caddy**: Reverse proxy for HTTPS (port 20443, when enabled)
+- **ngrok**: Tunneling service (when enabled)
+- **init**: Container initialization process
+
+The initialization process runs only once at container startup, then exits gracefully, leaving the services running under supervisor.
 
 ## Configuration Implementation Details
 
@@ -237,3 +306,20 @@ This implementation:
 3. Automatically installs Node.js if not available
 4. Installs packages globally using `npm install -g`
 5. Integrates with the existing configuration system
+
+### Modular Initialization System
+
+**parse_config_file Function**: Shared library function exported from init.sh
+
+- Located in `src/init/init.sh:8-26`
+- Parses configuration files and filters out comments and empty lines
+- Handles comment lines starting with `#` and empty lines
+- Returns space-separated valid entries for processing
+- Used by all modular parts for consistent config file parsing
+
+**Modular Parts Execution**: Sequential processing in src/init/init.sh
+
+- Executes parts in numeric order (`00_dirs.sh`, `01_info.sh`, etc.)
+- Each part runs as a separate bash script with error handling
+- Provides clean separation of concerns for initialization tasks
+- Enables easy addition of new initialization components

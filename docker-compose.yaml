@@ -2,15 +2,22 @@ services:
   vsce:
     container_name: vsce
     hostname: vsce
-    image: ghcr.io/nchekwa/vsce:latest
+    build: .
+    #image: ghcr.io/nchekwa/vsce:latest
     ports:
-      - 8080:8080
+      - 20080:20080     # HTTP to Code-Server
+      - 20443:20443     # HTTPS to Caddy->Code-Server[HTTP]
+      - 20022:20022     # SSH (if env SSHD_ENABLED=true)
     volumes:
-      - ./config/:/home/coder/.config
-      - ./project/:/home/coder/project
-    user: "${UID}:${GID}"
+      - ./project/:/home/coder/project             # Project files -> mounted as /home/coder/project
+      - ./data/config/:/home/coder/.config              # User config files
+      - ./data/code/:/home/coder/.code                  # User files related to code-server
+      - ./data/local/:/home/coder/.local                # User local files
+      #- ./src/caddy/Caddyfile:/etc/caddy/Caddyfile      # Caddy config if needs to be mounted (run caddy if you need by env CADDY_ENABLED=true)
+      - /var/run/docker.sock:/var/run/docker.sock       # If you need to access from inside docker to host docker instance
     healthcheck:
-      test: ['CMD', 'curl', '--fail-with-body', 'http://localhost:8080/']
+      test: ['CMD', 'curl', '--fail-with-body', 'http://localhost:20080/']
+    #user: "${UID}:${GID}"
     environment:
       DOCKER_USER: $USER
       PASSWORD: ${PASSWORD:-vsce}
@@ -26,12 +33,13 @@ services:
         kilocode.kilo-code
         anthropic.claude-code
       INSTALL_DPKG: |
-        curl
         git
-        jq
         docker.io
       INSTALL_NPM: |
-        @anthropic-ai/claude-codeafte
+        @anthropic-ai/claude-code
         @proofs-io/shotgun
         @proofs-io/shotgun-server
+      CADDY_ENABLED: "${CADDY_ENABLED:-false}"
+      SSHD_ENABLED: "${SSHD_ENABLED:-false}"
+      NGROK_AUTHTOKEN: "${NGROK_AUTHTOKEN:-}"
     stdin_open: true
