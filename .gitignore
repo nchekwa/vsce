@@ -1,5 +1,6 @@
-
-
+# Ignore .env files everywhere
+**/.env
+**/.env.*
 
 build.env
 docker-builder
