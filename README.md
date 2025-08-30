@@ -76,7 +76,21 @@ services:
     stdin_open: true
 ```
 
-*Please note that KiloCode / Roo Code / Cline - will not work with VSCE if it is not hidden over SSL proxy. You can use [Nginx](https://github.com/nchekwa/vsce/blob/main/nginx.conf) to proxy VSCE over SSL.*.
+> **Warning**: Some extensions such as KiloCode, Roo Code, and Cline may not work with VSCE unless accessed over an SSL proxy with a valid certificate. This issue is due to the Chrome browser blocking web views.
+>
+> If using Chrome, you can circumvent this by marking web views as secure:
+>
+> 1. Open Chrome and navigate to:
+>
+>    ```
+>    chrome://flags/#unsafely-treat-insecure-origin-as-secure
+>    ```
+>
+> 2. Add your VSCE URL to the list of insecure origins, e.g., `http://192.168.1.100:20080`.
+>
+> Please note, this workaround is applicable only for HTTP connections. For HTTPS/SSL connections, ensure you use a valid certificate for VSCE to function correctly. Use nGrok for testing SSL - you will find in `project` folder **vsce_ngrok.txt** file with URL.
+
+![unsafely-treat-insecure-origin-as-secure](./images/chrome-unsecure-http.png)
 
 ### Environment Variables
 
