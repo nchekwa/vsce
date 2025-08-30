@@ -2,7 +2,7 @@
 FROM codercom/code-server:latest
 
 # Re-declare build arg after FROM to make it available to this stage
-ARG VERSION="0.5.9"
+ARG VERSION="0.6.0"
 
 # Labels
 LABEL version="${VERSION}"
