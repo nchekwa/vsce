@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
     inputs:
       custom_version:
-        description: 'Custom version (optional, overrides version_type)[ie. 0.6.0]'
-        required: false
+        description: 'Custom version [e.g., v0.6.0-dev]'
+        required: true
         type: string
 
 jobs:
@@ -53,7 +53,7 @@ jobs:
           images: ghcr.io/${{ github.repository }}
           tags: |
             # Tag with the version from the workflow
-            type=raw,value=v${{ steps.version.outputs.NEW_VERSION }}
+            type=raw,value=${{ steps.version.outputs.NEW_VERSION }}
 
       - name: Build and push
         uses: docker/build-push-action@v6
