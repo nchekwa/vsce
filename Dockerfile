@@ -25,7 +25,7 @@ RUN sed -i '/^#alias ll=/s/^#//' /home/coder/.bashrc && \
     sed -i '/^#alias la=/s/^#//' /root/.bashrc && \
     sed -i '/^#alias l=/s/^#//' /root/.bashrc  && \
     apt-get update && \
-    apt-get install -y jq wget curl nano iputils-ping net-tools dnsutils traceroute supervisor openssh-server caddy && \
+    apt-get install -y jq wget curl nano iputils-ping net-tools netcat-openbsd dnsutils traceroute supervisor openssh-server caddy && \
     rm -rf /var/lib/apt/lists/* && \
     sed -i 's/^logfile=/user=root\nlogfile=/' /etc/supervisor/supervisord.conf && \
     sed -i 's/^chmod=0700/chmod=0777/' /etc/supervisor/supervisord.conf && \

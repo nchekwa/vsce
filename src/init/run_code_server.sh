@@ -14,6 +14,13 @@ fi
 ## --cert is ignored / we do SSL using Caddy
 CODE_SERVER_ARGS="--user-data-dir=/home/coder/.code/data --extensions-dir=/home/coder/.code/extensions $AUTH_ARG --disable-telemetry --host=0.0.0.0 --port=20080"
 
+
+# If there is mapped docker.sock / allow codder access to it
+if [ -f "/var/run/docker.sock" ]; then
+    sudo chown coder:coder /var/run/docker.sock
+fi
+
+
 # Start code-server
 if [ -d "/home/coder/project" ]; then
   echo "Project folder found, using as workspace"
