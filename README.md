@@ -6,6 +6,8 @@ A Docker-based VS Code Environment running code-server. Get a consistent, portab
 [![Docker Build](https://img.shields.io/github/actions/workflow/status/nchekwa/vsce/docker-publish.yml?branch=main&style=flat-square)](https://github.com/nchekwa/vsce/actions/workflows/docker-publish.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+![vsce](./images/ngrok-view.png)
+
 ## Quick Start
 
 ```bash
