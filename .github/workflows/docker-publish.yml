@@ -86,8 +86,8 @@ jobs:
           tags: |
             # Tag with release version when a release is published
             type=raw,value=${{ github.event.release.tag_name }},enable=${{ github.event_name == 'release' }}
-            # Tag as latest only for release publishes
-            type=raw,value=latest,enable=${{ github.event_name == 'release' }}
+            # Tag as latest only for release publishes, not for manual dispatch with custom version
+            type=raw,value=latest,enable=${{ github.event_name == 'release' && github.event.inputs.version == '' }}
             # Manual dispatch: use provided version input
             type=raw,value=${{ github.event.inputs.version }},enable=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version != '' }}
             # Always produce a sha tag

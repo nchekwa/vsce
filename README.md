@@ -16,25 +16,19 @@ cd vsce
 docker-compose up -d
 ```
 
-Or use the pre-built image directly:
-
-```yaml
-image: ghcr.io/nchekwa/vsce:latest
-```
-
-After starting the container, access VS Code at `http://localhost:20080` with the default password `vsce`.
+Access VS Code at `http://localhost:20080` with password `vsce`.
 
 ## Features
 
-- **VS Code in Browser**: Access a full VS Code experience through code-server.
-- **Automatic Extension Management**: Extensions are pre-installed on container startup.
-- **System Package Installation**: Add Debian packages to customize your environment.
-- **Global NPM Package Management**: Install npm packages globally within the container.
-- **Multi-Language Support**: Pre-configured environments for Node.js and Python.
-- **Multi-line Configuration**: Supports YAML-style multi-line configurations in docker-compose.
-- **Directory Auto-Creation**: Automatically creates directories for persistent storage.
-- **Persistent Configuration**: Settings, extensions, and data remain across restarts.
-- **Security Scanning**: Includes automated vulnerability scanning with Trivy and Snyk.
+- **VS Code in Browser**: Full VS Code experience via code-server
+- **Automatic Extension Management**: Pre-installed extensions on container start
+- **System Package Installation**: Install additional Debian packages
+- **Global NPM Package Management**: Install npm packages globally across the container
+- **Multi-Language Support**: Pre-configured Node.js and Python environments
+- **Multi-line Configuration**: Support for YAML-style multi-line configuration in docker-compose
+- **Directory Auto-Creation**: Automatic creation of required directories for persistent storage
+- **Persistent Configuration**: Settings, extensions, and data persist across restarts
+- **Security Scanning**: Automated vulnerability scanning with Trivy and Snyk
 
 ## Configuration
 
@@ -84,9 +78,9 @@ services:
     stdin_open: true
 ```
 
-> **Warning**: Some extensions like KiloCode, Roo Code, and Cline may not work with VSCE unless accessed over an SSL proxy with a valid certificate. This is due to Chrome blocking web views.
+> **Warning**: Some extensions such as KiloCode, Roo Code, and Cline may not work with VSCE unless accessed over an SSL proxy with a valid certificate. This issue is due to the Chrome browser blocking web views.
 >
-> If using Chrome, you can bypass this by marking web views as secure:
+> If using Chrome, you can circumvent this by marking web views as secure:
 >
 > 1. Open Chrome and navigate to:
 >
@@ -96,34 +90,34 @@ services:
 >
 > 2. Add your VSCE URL to the list of insecure origins, e.g., `http://192.168.1.100:20080`.
 >
-> **Note**: This workaround applies only to HTTP connections. For HTTPS/SSL connections, ensure you use a valid certificate. Use ngrok for testing SSL; check the `project` folder for a **vsce_ngrok.txt** file with the URL.
+> Please note, this workaround is applicable only for HTTP connections. For HTTPS/SSL connections, ensure you use a valid certificate for VSCE to function correctly. Use nGrok for testing SSL - you will find in `project` folder **vsce_ngrok.txt** file with URL.
 
 ![unsafely-treat-insecure-origin-as-secure](./images/chrome-unsecure-http.png)
 
 ### Environment Variables
 
-| Variable                   | Description                              | Default   |
-|----------------------------|------------------------------------------|-----------|
-| `PASSWORD`                | VS Code access password                 | `vsce`    |
-| `INSTALL_EXTENSIONS`      | VS Code extensions (supports multi-line YAML) | `""`     |
-| `INSTALL_DPKG`            | System packages to install via apt      | `""`     |
-| `INSTALL_NPM`             | Global npm packages to install          | `""`     |
-| `EXTENSIONS_UPDATE`       | Update existing extensions              | `false`   |
-| `INSTALL_EXTENSIONS_FORCE`| Force reinstall extensions              | `false`   |
-| `BOOT_INSTALL_SCRIPT`     | Path to custom boot script              | `""`     |
-| `CADDY_ENABLED`          | Enable Caddy reverse proxy              | `false`   |
-| `SSHD_ENABLED`            | Enable SSH server                       | `false`   |
-| `NGROK_AUTHTOKEN`         | Ngrok authentication token              | `""`     |
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PASSWORD` | VS Code password | `vsce` |
+| `INSTALL_EXTENSIONS` | VS Code extensions (supports multi-line YAML) | `""` |
+| `INSTALL_DPKG` | System packages to install via apt | `""` |
+| `INSTALL_NPM` | Global npm packages to install | `""` |
+| `EXTENSIONS_UPDATE` | Update existing extensions | `false` |
+| `INSTALL_EXTENSIONS_FORCE` | Force reinstall extensions | `false` |
+| `BOOT_INSTALL_SCRIPT` | Custom boot script path | `""` |
+| `CADDY_ENABLED` | Enable Caddy reverse proxy | `false` |
+| `SSHD_ENABLED` | Enable SSH server | `false` |
+| `NGROK_AUTHTOKEN` | Ngrok authentication token | `""` |
 
 ## Installing Extras in Docker
 
-VSCE supports automatic installation of additional components during container startup. This section explains how to install extras across different categories and configuration methods.
+VSCE supports the automatic installation of additional components during container startup. This section covers how to install extras under different categories and configuration methods.
 
 ### Autoinstall Categories
 
 #### VSCE Extensions
 
-VSCE lets you pre-install VS Code extensions, ready to use when the container starts.
+VSCE allows you to pre-install VS Code extensions to have them ready when the container starts.
 
 - **Via Configuration File**: Create `/config/extensions.txt` with a list of extension IDs.
 
@@ -151,7 +145,7 @@ VSCE lets you pre-install VS Code extensions, ready to use when the container st
 
 #### Debian Packages
 
-Install additional system packages via `apt` to tailor your environment.
+Install additional system packages via `apt` to customize your environment.
 
 - **Via Configuration File**: Create `/config/dpkg.txt` with a list of packages.
 
@@ -179,7 +173,7 @@ Install additional system packages via `apt` to tailor your environment.
 
 #### NPM Packages
 
-Install global npm packages to enhance development workflows.
+Install global npm packages to support development workflows.
 
 - **Via Configuration File**: Create `/config/npm.txt` with a list of packages.
 
@@ -207,72 +201,124 @@ Install global npm packages to enhance development workflows.
 
 ### Notes on Configuration
 
-- Multi-line YAML format is supported for improved readability in `docker-compose.yaml` files.
-- When npm packages are specified, VSCE checks for npm availability and installs Node.js using `nvm.sh` if needed.
+- Multi-line YAML format is supported for better readability in `docker-compose.yaml` files.
+- When npm packages are specified, VSCE automatically checks for npm availability and installs Node.js if necessary using `nvm.sh`.
 
-#### Custom Boot Script
+## Multi-line Configuration Support
 
-As the final step during container initialization, VSCE checks for a custom `boot.sh` script to run. This script executes after all other installation steps. By default, it looks for the script at `/home/coder/.config/boot.sh`, but you can specify a different path using the `BOOT_INSTALL_SCRIPT` environment variable. **Note**: The path in `BOOT_INSTALL_SCRIPT` is internal to the Docker container. If your script is external, it must be mapped to an internal path using a volume.
+The environment variables support multi-line YAML format for better readability in docker-compose files:
 
-- **Via Configuration File**: Place your custom script at `/home/coder/.config/boot.sh` (or another location if specified) with your commands. If the script is external, ensure it is mapped via a volume.
+### Multi-line Extensions
 
-  ```bash
-  #!/bin/bash
-  echo "Custom setup commands here..."
-  # Add your custom actions here
-  ```
+```yaml
+environment:
+  INSTALL_EXTENSIONS: |
+    ms-python.flake8
+    ms-python.pylint
+    redhat.vscode-yaml
+    ms-python.python
+    ms-azuretools.vscode-docker
+    kilocode.kilo-code
+```
 
-- **Via Environment Variable**: Set `BOOT_INSTALL_SCRIPT` to point to your custom script path (internal to Docker) when running the Docker command. Ensure the script is accessible inside the container.
+### Multi-line System Packages
 
-  ```bash
-  docker run -e BOOT_INSTALL_SCRIPT="/home/coder/.config/custom_boot.sh" -v "/path/on/host:/home/coder/.config" ghcr.io/nchekwa/vsce:latest
-  ```
+```yaml
+environment:
+  INSTALL_DPKG: |
+    curl
+    git
+    jq
+    htop
+    tree
+```
 
-- **Via Docker-Compose**: Use the `BOOT_INSTALL_SCRIPT` environment variable in your `docker-compose.yaml` to specify the path to your custom script (internal to Docker). Map the script via a volume if it is external.
+### Multi-line NPM Packages
 
-  ```yaml
-  environment:
-    BOOT_INSTALL_SCRIPT: "/home/coder/.config/custom_boot.sh"
-  volumes:
-    - ./config:/home/coder/.config
-  ```
+```yaml
+environment:
+  INSTALL_NPM: |
+    @anthropic-ai/claude-code
+    typescript
+    nodemon
+    eslint
+    prettier
+```
+
+## Global NPM Package Management
+
+VSCE supports automatic installation of global npm packages during container startup:
+
+### Using Environment Variables
+
+```bash
+# Set via docker-compose
+environment:
+  INSTALL_NPM: "typescript nodemon eslint prettier"
+
+# Or set via command line
+docker run -e INSTALL_NPM="typescript nodemon" ghcr.io/nchekwa/vsce:latest
+```
+
+### Using Configuration Files
+
+Create `/config/npm.txt`:
+
+```
+# Global npm packages to install
+@anthropic-ai/claude-code
+typescript
+nodemon
+eslint
+prettier
+@vue/cli
+create-react-app
+```
+
+### Automatic Node.js Setup
+
+When npm packages are specified, VSCE automatically:
+
+1. Checks if npm is available
+2. If not available, installs Node.js using nvm.sh
+3. Installs the specified packages globally
 
 ## Directory Auto-Creation
 
-VSCE automatically creates necessary directories for persistent storage:
+VSCE automatically creates required directories for persistent storage:
 
-- `/home/coder/.code/data` - Stores user data and settings.
-- `/home/coder/.code/extensions` - Stores VS Code extensions.
+- `/home/coder/.code/data` - User data and settings
+- `/home/coder/.code/extensions` - VS Code extensions
 
-This ensures:
+This ensures that:
 
-- Extensions persist across container restarts.
-- User settings are retained.
-- No startup errors due to missing directories.
-- A seamless persistent storage experience.
+- Extensions persist across container restarts
+- User settings are maintained
+- No startup errors from missing directories
+- Seamless persistent storage experience
 
 ## Base Code-Server vs. OpenVSCode-Server
 
-Two projects emulate Visual Studio Code in the browser:
+There are two projects that emulate Visual Studio Code in the browser:
 
 - [OpenVSCode-Server](https://github.com/gitpod-io/openvscode-server/)
 - [code-server](https://github.com/coder/code-server)
 
-### What's the Difference?
+### What's the difference?
 
-Both code-server and OpenVSCode-Server enable browser-based VS Code access, but they differ in integration approach:
+Both code-server and OpenVSCode-Server allow you to access VS Code via a browser. However, they differ in how they integrate VS Code:
 
 - **OpenVSCode-Server**: A direct fork of VS Code with changes committed directly.
-- **code-server**: Uses VS Code as a submodule with changes applied via patch files.
+- **code-server**: Incorporates VS Code as a submodule and applies changes via patch files.
 
 ## CI/CD
 
-Automated workflows manage:
+Automated workflows handle:
 
-- **Version Management**: Semantic versioning based on commit messages.
-- **Multi-Platform Builds**: Support for Linux AMD64 and ARM64.
-- **Security Scanning**: Integration with Trivy, Snyk, and Dockle.
-- **Docker Publishing**: Automatic image publishing to GitHub Container Registry.
+- **Version Management**: Automatic semantic versioning based on commit messages
+- **Multi-Platform Builds**: Linux AMD64 and ARM64 support
+- **Security Scanning**: Trivy, Snyk, and Dockle integration
+- **Docker Publishing**: Automated image publishing to GitHub Container Registry
 
 See [GitHub Actions](https://github.com/nchekwa/vsce/actions) for details.
 
