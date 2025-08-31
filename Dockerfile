@@ -2,10 +2,10 @@
 FROM codercom/code-server:latest
 
 # Re-declare build arg after FROM to make it available to this stage
-ARG VERSION="0.6.0"
+ARG VERSION="0.6.1"
 
 # Labels
-LABEL version="0.6.0-dev"
+LABEL version="0.6.1"
 LABEL maintainer="vsce"
 LABEL description="Docker-based VS Code Environment with code-server"
 LABEL org.opencontainers.image.title="VS Code Environment (VSCE)"
