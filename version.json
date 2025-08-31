@@ -1,5 +1,5 @@
 {
-  "version": "0.6.0",
+  "version": "0.6.0-dev",
   "name": "VS Code Environment (VSCE)",
   "description": "Docker-based VS Code Environment with code-server"
 }

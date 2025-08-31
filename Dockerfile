@@ -5,7 +5,7 @@ FROM codercom/code-server:latest
 ARG VERSION="0.6.0"
 
 # Labels
-LABEL version="0.6.0"
+LABEL version="0.6.0-dev"
 LABEL maintainer="vsce"
 LABEL description="Docker-based VS Code Environment with code-server"
 LABEL org.opencontainers.image.title="VS Code Environment (VSCE)"
