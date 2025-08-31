@@ -3,15 +3,6 @@ name: Simple Build Docker
 on:
   workflow_dispatch:
     inputs:
-      version_type:
-        description: 'Version bump type'
-        required: true
-        default: 'patch'
-        type: choice
-        options:
-        - patch
-        - minor
-        - major
       custom_version:
         description: 'Custom version (optional, overrides version_type)[ie. 0.6.0]'
         required: false
@@ -25,86 +16,21 @@ jobs:
       packages: write
     
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
-
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Calculate new version
+      - name: Determine version
         id: version
         run: |
           if [ -n "${{ github.event.inputs.custom_version }}" ]; then
             NEW_VERSION="${{ github.event.inputs.custom_version }}"
           else
-            CURRENT_VERSION=$(node -e "console.log(require('./version.json').version)")
-            IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
-            
-            case "${{ github.event.inputs.version_type }}" in
-              "major") MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
-              "minor") MINOR=$((MINOR + 1)); PATCH=0 ;;
-              "patch") PATCH=$((PATCH + 1)) ;;
-            esac
-            
-            NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+            NEW_VERSION=$(node -e "console.log(require('./version.json').version)")
           fi
-          
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "New version: $NEW_VERSION"
-
-      - name: Update version files
-        run: |
-          # Update version.json
-          node -e "
-            const version = require('./version.json');
-            version.version = '${{ steps.version.outputs.NEW_VERSION }}';
-            require('fs').writeFileSync('./version.json', JSON.stringify(version, null, 2));
-          "
-          
-          # Update Dockerfile if exists
-          if [ -f Dockerfile ]; then
-            if grep -q "LABEL version=" Dockerfile; then
-              sed -i "s/LABEL version=\".*\"/LABEL version=\"${{ steps.version.outputs.NEW_VERSION }}\"/" Dockerfile
-            else
-              echo "LABEL version=\"${{ steps.version.outputs.NEW_VERSION }}\"" >> Dockerfile
-            fi
-          fi
-
-      - name: Commit and tag
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add version.json Dockerfile
-          git commit -m "chore: bump version to ${{ steps.version.outputs.NEW_VERSION }}"
-          git push origin main
-          
-          git tag -a "v${{ steps.version.outputs.NEW_VERSION }}" -m "Version ${{ steps.version.outputs.NEW_VERSION }}"
-          git push origin "v${{ steps.version.outputs.NEW_VERSION }}"
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ steps.version.outputs.NEW_VERSION }}
-          name: Release v${{ steps.version.outputs.NEW_VERSION }}
-          body: |
-            ## Release v${{ steps.version.outputs.NEW_VERSION }}
-            
-            ### Installation
-            ```bash
-            docker pull ghcr.io/${{ github.repository }}:v${{ steps.version.outputs.NEW_VERSION }}
-            ```
-            ### If we define manually version - it will not be the latest (assume some dev version)
-            ${{ github.event.inputs.custom_version == '' && 'Or use latest:
-            ```bash
-            docker pull ghcr.io/${{ github.repository }}:latest
-            ```' || '' }}
-          draft: false
-          prerelease: false
+          echo "Version to build: $NEW_VERSION"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -128,8 +54,6 @@ jobs:
           tags: |
             # Tag with the version from the workflow
             type=raw,value=v${{ steps.version.outputs.NEW_VERSION }}
-            # Tag as latest only if not a custom version
-            type=raw,value=latest,enable=${{ github.event.inputs.custom_version == '' }}
 
       - name: Build and push
         uses: docker/build-push-action@v6
