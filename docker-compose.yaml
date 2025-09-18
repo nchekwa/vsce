@@ -39,6 +39,8 @@ services:
         @anthropic-ai/claude-code
         @proofs-io/shotgun
         @proofs-io/shotgun-server
+      INSTALL_PYTHON: |
+        
       CADDY_ENABLED: "${CADDY_ENABLED:-false}"
       SSHD_ENABLED: "${SSHD_ENABLED:-false}"
       NGROK_AUTHTOKEN: "${NGROK_AUTHTOKEN:-}"
