@@ -1,5 +1,10 @@
 # VS Code Environment (VSCE)
 
+> [!CAUTION]
+> This repository is close now. Please start using https://github.com/azdolinski/devcoder
+
+
+
 A Docker-based VS Code Environment running code-server. Get a consistent, portable VS Code experience with customizable extensions and system packages.
 
 [![Docker Image Version](https://img.shields.io/github/v/tag/nchekwa/vsce?color=blue&label=version&style=flat-square)](https://github.com/nchekwa/vsce/tags)
